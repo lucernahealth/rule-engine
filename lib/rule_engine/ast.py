@@ -143,7 +143,10 @@ class ExpressionBase(ASTNodeBase):
 
 	def _new_value(self, *args, **kwargs):
 		# perform a context aware load of value
-		value = coerce_value(*args, **kwargs)
+		if self.context.coerce_values:
+			value = coerce_value(*args, **kwargs)
+		else:
+			value = args[0]
 		if isinstance(value, datetime.datetime) and value.tzinfo is None:
 			value = value.replace(tzinfo=self.context.default_timezone)
 		return value

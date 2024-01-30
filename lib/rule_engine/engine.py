@@ -414,8 +414,7 @@ class Context(object):
 			type_resolver=None,
 			default_timezone='local',
 			default_value=errors.UNDEFINED,
-			decimal_context=None,
-			coerce_values=True
+			decimal_context=None
 	):
 		"""
 		:param int regex_flags: The flags to provide to functions in the :py:mod:`re` module when calling either the
@@ -433,10 +432,6 @@ class Context(object):
 			The default value will be taken from the current thread and will be used by all evaluations using this
 			:py:class:`~rule_engine.engine.Context` regardless of the decimal context of the thread which evaluates the
 			rule. This causes the rule evaluation to be consistent regardless of the calling thread.
-		:param coerce_values: Whether to coerce values to their appropriate data type. This is enabled by default.
-			When disabled, the values will be returned as-is. This can be useful when the same data is being used in
-			multiple rule evaluations and the coercion is done once before the rules are evaluated.
-		:type coerce_values: bool
 
 		.. versionchanged:: 2.0.0
 			Added the *default_value* parameter.
@@ -481,7 +476,6 @@ class Context(object):
 		"""The *decimal_context* parameter from :py:meth:`~__init__`"""
 		if isinstance(type_resolver, collections.abc.Mapping):
 			type_resolver = type_resolver_from_dict(type_resolver)
-		self.coerce_values = coerce_values
 		self.__type_resolver = type_resolver or (lambda _: ast.DataType.UNDEFINED)
 		self.__resolver = resolver or resolve_item
 

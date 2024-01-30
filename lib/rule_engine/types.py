@@ -68,6 +68,10 @@ def coerce_value(value, verify_type=True):
 	:param bool verify_type: Whether or not to verify the converted value's type.
 	:return: The converted value.
 	"""
+	# don't recurse into dicts
+	if isinstance(value, (dict, collections.OrderedDict)):
+		return value
+
 	# ARRAY
 	if isinstance(value, (list, range, tuple)):
 		value = tuple(coerce_value(v, verify_type=verify_type) for v in value)
@@ -77,11 +81,6 @@ def coerce_value(value, verify_type=True):
 	# FLOAT
 	elif isinstance(value, (float, int)) and not isinstance(value, bool):
 		value = _to_decimal(value)
-	# MAPPING
-	elif isinstance(value, (dict, collections.OrderedDict)):
-		value = collections.OrderedDict(
-			(coerce_value(k, verify_type=verify_type), coerce_value(v, verify_type=verify_type)) for k, v in value.items()
-		)
 	if verify_type:
 		DataType.from_value(value)  # use this to raise a TypeError, if the type is incompatible
 	return value
@@ -165,6 +164,9 @@ def iterable_member_value_type(python_value):
 		else:
 			subvalue_type = DataType.from_value(subvalue)
 		subvalue_types.add(subvalue_type)
+		# early exit if we've already found more than one type
+		if len(subvalue_types) > 1:
+			break
 	if DataType.NULL in subvalue_types:
 		# treat NULL as a special case, allowing typed arrays to be a specified type *or* NULL
 		# this however makes it impossible to define an array with a type of NULL
